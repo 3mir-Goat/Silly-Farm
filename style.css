@@ -1,0 +1,81 @@
+body{
+font-family:sans-serif;
+background:#1e1e1e;
+color:white;
+text-align:center;
+}
+
+button{
+padding:10px;
+margin:5px;
+cursor:pointer;
+}
+
+.hidden{
+display:none !important;
+}
+
+.screen{
+margin-top:80px;
+}
+
+/* FARM LAYOUT */
+
+#farmScreen{
+display:flex;
+justify-content:flex-start;
+align-items:flex-start;
+gap:40px;
+margin-top:40px;
+padding-left:20px;
+}
+
+/* SIDE MENU */
+
+#sideMenu{
+width:120px;
+min-height:200px;
+display:flex;
+flex-direction:column;
+gap:10px;
+flex-shrink:0;
+}
+
+/* FARM GRID */
+
+#farm{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+padding:20px;
+background:#2a2a2a;
+border-radius:8px;
+width:400px;
+justify-content:center;
+}
+
+/* TILE */
+
+.tile{
+width:80px;
+height:80px;
+background:#8B6F47;
+cursor:pointer;
+border:1px solid #555;
+border-radius:4px;
+}
+
+.tile.growing{
+background:green;
+}
+
+.tile.ready{
+background:yellow;
+}
+
+/* CONTENT AREA (prevents layout shifting) */
+
+#sideContent{
+min-height:120px;
+margin-top:15px;
+}

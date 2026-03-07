@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Silly Farm Game</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- MAIN MENU -->
+
+<div id="mainMenu" class="screen">
+
+<h1>Silly Farm Game</h1>
+
+<button onclick="showScreen('playMenu')">Play</button>
+<button onclick="showScreen('optionsMenu')">Options</button>
+<button onclick="showScreen('leaderboardMenu')">Leaderboard</button>
+
+</div>
+
+
+<!-- PLAY MENU -->
+
+<div id="playMenu" class="screen hidden">
+
+<h2>Select Mode</h2>
+
+<button onclick="startMode('single')">Singleplayer</button>
+<button onclick="startMode('coop')">Co-op</button>
+
+<button onclick="showScreen('mainMenu')">Back</button>
+
+</div>
+
+
+<!-- SAVE MENU -->
+
+<div id="saveMenu" class="screen hidden">
+
+<h2>Select Save Slot</h2>
+
+<button onclick="clearAllSaves()">Clear All Saves</button>
+
+<button onclick="loadSave(1)">Slot 1</button>
+<button onclick="loadSave(2)">Slot 2</button>
+<button onclick="loadSave(3)">Slot 3</button>
+
+<button onclick="showScreen('mainMenu')">Back</button>
+
+</div>
+
+
+<!-- OPTIONS -->
+
+<div id="optionsMenu" class="screen hidden">
+
+<h2>Options</h2>
+
+<button onclick="toggleSound()">Toggle Sound</button>
+
+<button onclick="showScreen('mainMenu')">Back</button>
+
+</div>
+
+
+<!-- LEADERBOARD -->
+
+<div id="leaderboardMenu" class="screen hidden">
+
+<h2>Leaderboard</h2>
+
+<div id="leaderboard">
+1. Not yet implemented
+</div>
+
+<button onclick="showScreen('mainMenu')">Back</button>
+
+</div>
+
+
+<!-- FARM SCREEN -->
+
+<div id="farmScreen" class="hidden">
+
+<div id="sideMenu" class="hidden">
+
+<h3>Menu</h3>
+
+<button onclick="openShop()">Shop</button>
+<button onclick="showStats()">Stats</button>
+<button onclick="openSettings()">Settings</button>
+
+<div id="sideContent"></div>
+
+</div>
+
+<div id="farm"></div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
