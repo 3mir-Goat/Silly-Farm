@@ -127,3 +127,34 @@ margin-top:15px;
         height: 60px;
     }
 }
+
+/* HIGH-DPI SCALING */
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    button {
+        padding: 15px 20px;
+        font-size: 18px;
+        margin: 8px;
+    }
+    
+    h1 {
+        font-size: 3em;
+    }
+    
+    h2 {
+        font-size: 2em;
+    }
+    
+    h3 {
+        font-size: 1.5em;
+    }
+    
+    .tile {
+        width: 100px;
+        height: 100px;
+    }
+    
+    #sideMenu {
+        width: 150px;
+    }
+}
