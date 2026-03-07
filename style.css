@@ -84,16 +84,46 @@ margin-top:15px;
 
 @media (max-width: 768px) {
     button {
-        padding: 40px;
-        font-size: 36px;
-        margin: 20px;
+        padding: 15px 20px;
+        font-size: 16px;
+        margin: 10px 5px;
     }
     
     h1 {
-        font-size: 5em;
+        font-size: 2em;
+        margin: 20px 10px;
     }
     
     h2 {
-        font-size: 4em;
+        font-size: 1.5em;
+        margin: 15px 10px;
+    }
+    
+    .screen {
+        margin-top: 20px;
+        padding: 0 10px;
+    }
+    
+    #farmScreen {
+        flex-direction: column;
+        gap: 20px;
+        padding: 10px;
+    }
+    
+    #sideMenu {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    #farm {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .tile {
+        width: 60px;
+        height: 60px;
     }
 }
