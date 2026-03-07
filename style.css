@@ -84,16 +84,16 @@ margin-top:15px;
 
 @media (max-width: 768px) {
     button {
-        padding: 20px;
-        font-size: 18px;
-        margin: 10px;
+        padding: 40px;
+        font-size: 36px;
+        margin: 20px;
     }
     
     h1 {
-        font-size: 2.5em;
+        font-size: 5em;
     }
     
     h2 {
-        font-size: 2em;
+        font-size: 4em;
     }
 }
