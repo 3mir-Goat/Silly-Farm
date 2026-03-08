@@ -62,7 +62,7 @@ function loadSave(slot) {
     const data = localStorage.getItem("save" + slot)
     if (data) {
         const save = JSON.parse(data)
-        money = save.money ?? 0.2
+        money = save.money ?? 0
         wheat_seeds = save.wheat_seeds ?? 1
         corn_seeds = save.corn_seeds ?? 0
         carrot_seeds = save.carrot_seeds ?? 0
@@ -74,7 +74,7 @@ function loadSave(slot) {
         tiles = save.tiles ?? []
         totalTiles = save.totalTiles ?? 3
     } else {
-        money = 0.2
+        money = 0
         wheat_seeds = 1
         corn_seeds = carrot_seeds = potato_seeds = 0
         wheat = corn = carrot = potato = 0
