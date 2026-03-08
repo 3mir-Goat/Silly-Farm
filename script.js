@@ -2,7 +2,7 @@ let currentSlot = 1
 let gameMode = "single"
 let totalTiles = 3
 let money = 0.2
-let wheat_seeds = 0
+let wheat_seeds = 1
 let corn_seeds = 0
 let carrot_seeds = 0
 let potato_seeds = 0
@@ -62,8 +62,8 @@ function loadSave(slot) {
     const data = localStorage.getItem("save" + slot)
     if (data) {
         const save = JSON.parse(data)
-        money = save.money ?? 5
-        wheat_seeds = save.wheat_seeds ?? 0
+        money = save.money ?? 0.2
+        wheat_seeds = save.wheat_seeds ?? 1
         corn_seeds = save.corn_seeds ?? 0
         carrot_seeds = save.carrot_seeds ?? 0
         potato_seeds = save.potato_seeds ?? 0
@@ -74,8 +74,9 @@ function loadSave(slot) {
         tiles = save.tiles ?? []
         totalTiles = save.totalTiles ?? 3
     } else {
-        money = 5
-        wheat_seeds = corn_seeds = carrot_seeds = potato_seeds = 0
+        money = 0.2
+        wheat_seeds = 1
+        corn_seeds = carrot_seeds = potato_seeds = 0
         wheat = corn = carrot = potato = 0
         tiles = []
         totalTiles = 3
@@ -392,6 +393,14 @@ function openMarket() {
     }
     
     document.getElementById("sideContent").innerHTML = html
+}
+
+function openRefinery() {
+    currentMenu = "refinery"
+    document.getElementById("sideContent").innerHTML = `
+<h4>Refinery</h4>
+<p>Not yet implemented</p>
+`
 }
 
 
