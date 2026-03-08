@@ -1,383 +1,397 @@
 let currentSlot = 1
 let gameMode = "single"
-
+let totalTiles = 3
+let money = 5
+let wheat_seeds = 0
+let corn_seeds = 0
+let carrot_seeds = 0
+let potato_seeds = 0
+let wheat = 0
+let corn = 0
+let carrot = 0
+let potato = 0
+let soundOn = true
+let tiles = []
+let currentMenu = "none"
 let farmSize = 3
 
-let totalTiles = 3
+/* MONEY FORMATTING */
 
-let money = 5
-let seeds = 0
-
-let soundOn = true
-
-let tiles = []
-
-let currentMenu = "none"
-
-
+function formatMoney(amount) {
+    return amount.toFixed(1)
+}
 
 /* SCREEN SWITCHING */
 
-function showScreen(id){
-
-// remember which non-game screen we're on
-localStorage.setItem("currentScreen", id)
-
-document.querySelectorAll(".screen").forEach(s=>{
-    s.classList.add("hidden")
-})
-
-document.getElementById("farmScreen").classList.add("hidden")
-
-document.getElementById("sideMenu").classList.add("hidden")
-
-document.getElementById(id).classList.remove("hidden")
-
+function showScreen(id) {
+    sessionStorage.setItem("currentScreen", id)
+    document.querySelectorAll(".screen").forEach(s => s.classList.add("hidden"))
+    document.getElementById("farmScreen").classList.add("hidden")
+    document.getElementById("sideMenu").classList.add("hidden")
+    document.getElementById(id).classList.remove("hidden")
 }
-
-
 
 /* GAME MODE */
 
-function startMode(mode){
-
-gameMode = mode
-showScreen("saveMenu")
-
+function startMode(mode) {
+    gameMode = mode
+    showScreen("saveMenu")
 }
-
-
 
 /* SAVE SYSTEM */
 
-function saveGame(){
-
-let data = {
-money,
-seeds,
-tiles,
-totalTiles
+function saveGame() {
+    const data = {
+        money, wheat_seeds, corn_seeds, carrot_seeds, potato_seeds,
+        wheat, corn, carrot, potato, tiles, totalTiles
+    }
+    localStorage.setItem("save" + currentSlot, JSON.stringify(data))
 }
 
-localStorage.setItem("save"+currentSlot, JSON.stringify(data))
-
+function clearAllSaves() {
+    localStorage.removeItem("save1")
+    localStorage.removeItem("save2")
+    localStorage.removeItem("save3")
+    alert("All saves cleared!")
 }
 
-
-function clearAllSaves(){
-
-localStorage.removeItem("save1")
-localStorage.removeItem("save2")
-localStorage.removeItem("save3")
-
-// Optionally, show a message or refresh the menu
-alert("All saves cleared!")
-
+function loadSave(slot) {
+    currentSlot = slot
+    sessionStorage.setItem("currentSlot", slot)
+    sessionStorage.setItem("inGame", "1")
+    const data = localStorage.getItem("save" + slot)
+    if (data) {
+        const save = JSON.parse(data)
+        money = save.money ?? 5
+        wheat_seeds = save.wheat_seeds ?? 0
+        corn_seeds = save.corn_seeds ?? 0
+        carrot_seeds = save.carrot_seeds ?? 0
+        potato_seeds = save.potato_seeds ?? 0
+        wheat = save.wheat ?? 0
+        corn = save.corn ?? 0
+        carrot = save.carrot ?? 0
+        potato = save.potato ?? 0
+        tiles = save.tiles ?? []
+        totalTiles = save.totalTiles ?? 3
+    } else {
+        money = 5
+        wheat_seeds = corn_seeds = carrot_seeds = potato_seeds = 0
+        wheat = corn = carrot = potato = 0
+        tiles = []
+        totalTiles = 3
+    }
+    startGame()
 }
 
-
-function loadSave(slot){
-
-currentSlot = slot
-
-// mark this slot as current and record that we're in-game
-localStorage.setItem("currentSlot", slot)
-localStorage.setItem("inGame", "1")
-
-let data = localStorage.getItem("save"+slot)
-
-if(data){
-
-let save = JSON.parse(data)
-
-money = save.money || 5
-seeds = save.seeds || 0
-tiles = save.tiles
-totalTiles = save.totalTiles || 3
-
-}else{
-
-tiles = []
-totalTiles = 3
-
+function exitGame() {
+    saveGame()
+    sessionStorage.setItem("inGame", "0")
+    document.getElementById("sideMenu").classList.add("hidden")
+    showScreen("mainMenu")
 }
-
-startGame()
-
-}
-
-
-function exitGame(){
-
-saveGame()
-
-// leaving the farm so clear inGame flag
-localStorage.setItem("inGame", "0")
-
-document.getElementById("sideMenu").classList.add("hidden")
-
-showScreen("mainMenu")
-
-}
-
-
 
 /* START GAME */
 
-function startGame(){
-
-document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"))
-
-document.getElementById("farmScreen").classList.remove("hidden")
-
-document.getElementById("sideMenu").classList.remove("hidden")
-
-document.getElementById("sideContent").innerHTML=""
-
-createFarm()
-
+function startGame() {
+    document.querySelectorAll(".screen").forEach(s => s.classList.add("hidden"))
+    document.getElementById("farmScreen").classList.remove("hidden")
+    document.getElementById("sideMenu").classList.remove("hidden")
+    document.getElementById("sideContent").innerHTML = ""
+    createFarm()
 }
-
-
 
 /* FARM */
 
-function createFarm(){
-
-const farm = document.getElementById("farm")
-
-farm.innerHTML=""
-
-for(let i=0;i<totalTiles;i++){
-
-let tile = document.createElement("div")
-
-tile.classList.add("tile")
-
-if(!tiles[i]) tiles[i]={state:"empty"}
-
-updateTile(tile,i)
-
-tile.onclick = ()=>interactTile(tile,i)
-
-farm.appendChild(tile)
-
+function createFarm() {
+    const farm = document.getElementById("farm")
+    farm.innerHTML = ""
+    for (let i = 0; i < totalTiles; i++) {
+        const tile = document.createElement("div")
+        tile.classList.add("tile")
+        if (!tiles[i]) tiles[i] = { state: "empty" }
+        updateTile(tile, i)
+        tile.onclick = () => interactTile(tile, i)
+        farm.appendChild(tile)
+        if (tiles[i].state === "growing" && tiles[i].plantedAt) {
+            const elapsed = Date.now() - tiles[i].plantedAt
+            const growTime = getCropGrowTime(tiles[i].cropType)
+            if (elapsed >= growTime) {
+                tiles[i].state = "ready"
+                updateTile(tile, i)
+            } else {
+                setTimeout(() => {
+                    tiles[i].state = "ready"
+                    updateTile(tile, i)
+                }, growTime - elapsed)
+            }
+        }
+    }
 }
 
+function updateTile(tile, index) {
+    const state = tiles[index].state
+    tile.className = "tile"
+    if (state === "growing") {
+        tile.classList.add("growing")
+        const cropType = tiles[index].cropType
+        if (cropType === "wheat") tile.textContent = "🌾"
+        else if (cropType === "corn") tile.textContent = "🌽"
+        else if (cropType === "carrot") tile.textContent = "🥕"
+        else if (cropType === "potato") tile.textContent = "🥔"
+    }
+    if (state === "ready") {
+        tile.classList.add("ready")
+        const cropType = tiles[index].cropType
+        if (cropType === "wheat") tile.textContent = "🌾"
+        else if (cropType === "corn") tile.textContent = "🌽"
+        else if (cropType === "carrot") tile.textContent = "🥕"
+        else if (cropType === "potato") tile.textContent = "🥔"
+    }
 }
 
+/* CROP DATA */
 
-
-function updateTile(tile,index){
-
-let state = tiles[index].state
-
-tile.className="tile"
-
-if(state==="growing") tile.classList.add("growing")
-
-if(state==="ready") tile.classList.add("ready")
-
+const CROPS = {
+    wheat: { growTime: 5000, cost: 0.2, sell: 0.5 },
+    corn: { growTime: 10000, cost: 7.5, sell: 15 },
+    carrot: { growTime: 15000, cost: 75, sell: 150 },
+    potato: { growTime: 20000, cost: 1000, sell: 2000 }
 }
 
+function getCropGrowTime(cropType) {
+    return CROPS[cropType]?.growTime || 5000
+}
 
+function getCropCost(cropType) {
+    return CROPS[cropType]?.cost || 0
+}
+
+function getCropSellPrice(cropType) {
+    return CROPS[cropType]?.sell || 0
+}
+
+function getCropCount(cropType) {
+    if (cropType === "wheat") return wheat
+    if (cropType === "corn") return corn
+    if (cropType === "carrot") return carrot
+    if (cropType === "potato") return potato
+    return 0
+}
+
+function setCropCount(cropType, amount) {
+    if (cropType === "wheat") wheat = amount
+    else if (cropType === "corn") corn = amount
+    else if (cropType === "carrot") carrot = amount
+    else if (cropType === "potato") potato = amount
+}
+
+function getSeedCount(cropType) {
+    if (cropType === "wheat") return wheat_seeds
+    if (cropType === "corn") return corn_seeds
+    if (cropType === "carrot") return carrot_seeds
+    if (cropType === "potato") return potato_seeds
+    return 0
+}
+
+function setSeedCount(cropType, amount) {
+    if (cropType === "wheat") wheat_seeds = amount
+    else if (cropType === "corn") corn_seeds = amount
+    else if (cropType === "carrot") carrot_seeds = amount
+    else if (cropType === "potato") potato_seeds = amount
+}
 
 /* TILE INTERACTION */
 
-function interactTile(tile,index){
-
-let state = tiles[index].state
-
-if(state==="empty"){
-
-if(seeds<=0) return
-
-seeds--
-
-tiles[index].state="growing"
-
-updateTile(tile,index)
-
-refreshMenu()
-
-setTimeout(()=>{
-
-tiles[index].state="ready"
-updateTile(tile,index)
-
-},5000)
-
+function interactTile(tile, index) {
+    let state = tiles[index].state
+    if (state === "empty") {
+        currentMenu = "plantSelect"
+        let html = `<h4>Plant Seed</h4>`
+        for (let cropType in CROPS) {
+            let count = getSeedCount(cropType)
+            html += `<button onclick="plantCrop('${cropType}', ${index})">${cropType.charAt(0).toUpperCase() + cropType.slice(1)} Seeds (${count})</button><br>`
+        }
+        document.getElementById("sideContent").innerHTML = html
+    } else if (state === "ready") {
+        let cropType = tiles[index].cropType
+        tiles[index].state = "empty"
+        delete tiles[index].plantedAt
+        delete tiles[index].cropType
+        let newCount = getCropCount(cropType) + 1
+        setCropCount(cropType, newCount)
+        createFarm()
+        refreshMenu()
+    }
+    saveGame()
 }
 
-else if(state==="ready"){
-
-tiles[index].state="empty"
-
-money += 10
-
-updateTile(tile,index)
-
-refreshMenu()
-
+function plantCrop(cropType, tileIndex) {
+    const count = getSeedCount(cropType)
+    if (count <= 0) return
+    
+    setSeedCount(cropType, count - 1)
+    
+    tiles[tileIndex].state = "growing"
+    tiles[tileIndex].cropType = cropType
+    tiles[tileIndex].plantedAt = Date.now()
+    
+    const growTime = getCropGrowTime(cropType)
+    const tile = document.querySelector(`#farm .tile:nth-child(${tileIndex + 1})`)
+    updateTile(tile, tileIndex)
+    
+    // Refresh immediately after planting for smoother experience
+    if (currentMenu === "plantSelect") {
+        // Update the plant selection menu to show new seed counts
+        currentMenu = "plantSelect" // Keep it as plantSelect
+        let html = `<h4>Plant Seed</h4>`
+        for (const cropType in CROPS) {
+            const count = getSeedCount(cropType)
+            html += `<button onclick="plantCrop('${cropType}', ${tileIndex})">${cropType.charAt(0).toUpperCase() + cropType.slice(1)} Seeds (${count})</button><br>`
+        }
+        document.getElementById("sideContent").innerHTML = html
+    } else {
+        refreshMenu()
+    }
+    
+    setTimeout(() => {
+        tiles[tileIndex].state = "ready"
+        updateTile(tile, tileIndex)
+    }, growTime)
+    
+    saveGame()
 }
 
-saveGame()
-
+function refreshMenu() {
+    if (currentMenu === "shop") openShop()
+    if (currentMenu === "stats") showStats()
+    if (currentMenu === "crops") showCrops()
+    if (currentMenu === "market") openMarket()
+    if (currentMenu === "plantSelect") {}
 }
 
-
-
-/* MENU REFRESH */
-
-function refreshMenu(){
-
-if(currentMenu==="shop") openShop()
-if(currentMenu==="stats") showStats()
-
+function openShop() {
+    currentMenu = "shop"
+    const buttonText = "Add Tile"
+    let costText = ""
+    const upgradesDone = totalTiles - 3
+    if (upgradesDone < upgradeCosts.length) {
+        const cost = upgradeCosts[upgradesDone]
+        costText = ` ($${formatMoney(cost)})`
+    } else {
+        costText = " (MAX)"
+    }
+    let html = `<h4>Shop</h4>Money: $${formatMoney(money)}<br><br>`
+    for (const cropType in CROPS) {
+        const cost = getCropCost(cropType)
+        const display = cropType.charAt(0).toUpperCase() + cropType.slice(1)
+        html += `<button onclick="buySeed('${cropType}')">${display} Seed ($${formatMoney(cost)})</button><br>`
+    }
+    html += `<br><button onclick="upgradeFarm()">${buttonText}${costText}</button>`
+    document.getElementById("sideContent").innerHTML = html
 }
 
-
-
-/* SHOP */
-
-function openShop(){
-
-currentMenu="shop"
-
-let buttonText = "Add Tile"
-let costText = ""
-let upgradesDone = totalTiles - 3
-if(upgradesDone < upgradeCosts.length){
- let cost = upgradeCosts[upgradesDone]
- costText = ` ($${cost})`
-} else {
- costText = " (MAX)"
+function buySeed(cropType) {
+    const cost = getCropCost(cropType)
+    if (money >= cost) {
+        money -= cost
+        const count = getSeedCount(cropType)
+        setSeedCount(cropType, count + 1)
+        openShop()
+        saveGame()
+    }
 }
 
-document.getElementById("sideContent").innerHTML=
+const upgradeCosts = [50, 100, 200, 300, 500, 750, 1000, 1500, 2500, 4000, 6000, 10000]
 
-`
-<h4>Shop</h4>
-
-Money: $${money}<br>
-Seeds: ${seeds}<br><br>
-
-<button onclick="buySeed()">Buy Seed ($5)</button>
-<button onclick="upgradeFarm()">${buttonText}${costText}</button>
-`
-
+function upgradeFarm() {
+    const upgradesDone = totalTiles - 3
+    if (upgradesDone >= upgradeCosts.length) return
+    const cost = upgradeCosts[upgradesDone]
+    if (money < cost) return
+    money -= cost
+    totalTiles++
+    createFarm()
+    openShop()
 }
 
-
-function buySeed(){
-
-if(money>=5){
-
-money-=5
-seeds++
-
-openShop()
-
+function showCrops() {
+    currentMenu = "crops"
+    let html = `<h4>Crops</h4>`
+    for (const cropType in CROPS) {
+        const count = getCropCount(cropType)
+        const price = getCropSellPrice(cropType)
+        const display = cropType.charAt(0).toUpperCase() + cropType.slice(1)
+        html += `${display}: ${count}<br>`
+        if (count > 0) {
+            html += `<button onclick="sellCrop('${cropType}')">Sell for $${formatMoney(price)}</button><br>`
+        }
+    }
+    document.getElementById("sideContent").innerHTML = html
 }
 
+function sellCrop(cropType) {
+    const count = getCropCount(cropType)
+    if (count <= 0) return
+    const price = getCropSellPrice(cropType)
+    money += price
+    setCropCount(cropType, count - 1)
+    refreshMenu()
+    saveGame()
 }
 
-
-
-/* FARM UPGRADES */
-
-// cost schedule for each upgrade (1st purchase = 4th tile overall)
-const upgradeCosts = [
-  30,  // 1st tile (total 4)
-  50,  // 2nd tile
-  80, // 3rd tile
-  120,
-  150,
-  200,
-  300,
-  400,
-  500,
-  600,
-  750,
-  1000 // 12th purchase (total 15)
-];
-// upgradeCosts[index] gives price for the (index+1)th purchase
-
-
-function upgradeFarm(){
-
-let upgradesDone = totalTiles - 3; // number already bought
-if(upgradesDone >= upgradeCosts.length) return
-
-let cost = upgradeCosts[upgradesDone]
-if(money < cost) return
-
-money -= cost
-
-totalTiles++
-
-createFarm()
-
-openShop()
-
-}
-
-
-
-/* STATS */
-
-function showStats(){
-
-currentMenu="stats"
-
-let tileInfo = `${totalTiles} tiles`
-if(totalTiles>=15) tileInfo += " (MAX)"
-
-document.getElementById("sideContent").innerHTML=
-
-`
+function showStats() {
+    currentMenu = "stats"
+    let tileInfo = `${totalTiles} tiles`
+    if (totalTiles >= 15) tileInfo += " (MAX)"
+    document.getElementById("sideContent").innerHTML = `
 <h4>Stats</h4>
-
-Money: $${money}<br>
-Seeds: ${seeds}<br>
+Money: $${formatMoney(money)}<br>
 Tile count: ${tileInfo}
-
 `
-
 }
 
-
-
-/* SETTINGS */
-
-function openSettings(){
-
-currentMenu="settings"
-
-document.getElementById("sideContent").innerHTML=
-
-`
+function openSettings() {
+    currentMenu = "settings"
+    document.getElementById("sideContent").innerHTML = `
 <h4>Settings</h4>
-
-<button onclick="toggleSound()">Sound: ${soundOn?"ON":"OFF"}</button>
-
+<button onclick="toggleSound()">Sound: ${soundOn ? "ON" : "OFF"}</button>
 <br><br>
-
 <button onclick="exitGame()">Exit Game</button>
 `
-
 }
 
+function toggleSound() {
+    soundOn = !soundOn
+    openSettings()
+}
 
+/* MARKET */
 
-/* SOUND */
-
-function toggleSound(){
-
-soundOn=!soundOn
-
-openSettings()
-
+function openMarket() {
+    currentMenu = "market"
+    let html = `<h4>Market</h4>`
+    html += `<p>Money: $${formatMoney(money)}</p><br>`
+    
+    let hasCrops = false
+    for (let cropType in CROPS) {
+        let count = getCropCount(cropType)
+        let price = getCropSellPrice(cropType)
+        let display = cropType.charAt(0).toUpperCase() + cropType.slice(1)
+        
+        if (count > 0) {
+            hasCrops = true
+            html += `<div style="margin: 10px 0;">`
+            html += `${display}: ${count} units<br>`
+            html += `<button onclick="sellCrop('${cropType}')">Sell for $${formatMoney(price)}</button>`
+            html += `</div>`
+        }
+    }
+    
+    if (!hasCrops) {
+        html += `<p>No crops available to sell. Harvest some crops first!</p>`
+    }
+    
+    document.getElementById("sideContent").innerHTML = html
 }
 
 
@@ -388,11 +402,11 @@ openSettings()
 window.addEventListener('beforeunload', saveGame)
 
 // restore if we were already playing
-let resumedSlot = localStorage.getItem("currentSlot")
-let wasInGame = localStorage.getItem("inGame") === "1"
-if(resumedSlot && wasInGame){
-    loadSave(parseInt(resumedSlot,10))
+let resumedSlot = sessionStorage.getItem("currentSlot")
+let wasInGame = sessionStorage.getItem("inGame") === "1"
+if (resumedSlot && wasInGame) {
+    loadSave(parseInt(resumedSlot, 10))
 } else {
-    let screen = localStorage.getItem("currentScreen") || "mainMenu"
+    let screen = sessionStorage.getItem("currentScreen") || "mainMenu"
     showScreen(screen)
 }

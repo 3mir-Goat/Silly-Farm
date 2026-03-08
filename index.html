@@ -67,6 +67,21 @@
 </div>
 
 
+<!-- MARKET -->
+
+<div id="marketMenu" class="screen hidden">
+
+<h2>Market</h2>
+
+<div id="marketContent">
+<p>Load a game to access the market</p>
+</div>
+
+<button onclick="showScreen('mainMenu')">Back</button>
+
+</div>
+
+
 <!-- LEADERBOARD -->
 
 <div id="leaderboardMenu" class="screen hidden">
@@ -84,7 +99,7 @@
 
 <!-- FARM SCREEN -->
 
-<div id="farmScreen" class="hidden">
+<div id="farmScreen" class="screen hidden">
 
 <div id="sideMenu" class="hidden">
 
@@ -92,6 +107,8 @@
 
 <button onclick="openShop()">Shop</button>
 <button onclick="showStats()">Stats</button>
+<button onclick="showCrops()">Crops</button>
+<button onclick="openMarket()">Market</button>
 <button onclick="openSettings()">Settings</button>
 
 <div id="sideContent"></div>
